@@ -14,6 +14,7 @@ import com.example.model.BadgeData
 import com.example.model.LeaderboardEntry
 import com.example.model.UserProfile
 import com.example.model.UserStats
+import com.example.util.NotificationHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -72,7 +73,8 @@ class EduPlayViewModel(application: Application) : AndroidViewModel(application)
                         gamesPlayed = entity.gamesPlayed,
                         longestStreak = entity.dayStreak + 5,
                         dailyGoalCompleted = 2,
-                        dailyGoalTotal = 3
+                        dailyGoalTotal = 3,
+                        livesCount = entity.livesCount
                     )
                     _userProfile.value = UserProfile(
                         name = entity.name,
@@ -81,6 +83,8 @@ class EduPlayViewModel(application: Application) : AndroidViewModel(application)
                         joinedYear = "2024",
                         avatarRes = R.drawable.img_avatar_emma
                     )
+                    // Mostrar notificación persistente de vidas restantes
+                    NotificationHelper.showPersistentLivesNotification(application, entity.livesCount)
                 } else {
                     _userEntity.value = null
                 }
@@ -201,6 +205,10 @@ class EduPlayViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun completeTracing() {
+        if (_stats.value.livesCount <= 0) {
+            showCelebration("¡Te has quedado sin vidas por hoy! Vuelve mañana para más vidas. ⏳")
+            return
+        }
         addXpAndPersist(50, 5, 0, 1, 0)
         showCelebration("¡Excelente trabajo trazando! ¡Letra dominada! ⭐")
     }
@@ -238,6 +246,10 @@ class EduPlayViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun checkWordBuilder(): Boolean {
+        if (_stats.value.livesCount <= 0) {
+            showCelebration("¡Te has quedado sin vidas por hoy! Vuelve mañana para más vidas. ⏳")
+            return false
+        }
         val current = _wordBuilderState.value
         val assembled = current.letterSlots.filterNotNull().joinToString("")
         val isMatch = assembled.equals(current.targetWord, ignoreCase = true)
@@ -269,6 +281,10 @@ class EduPlayViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun continueAnimalQuiz() {
+        if (_stats.value.livesCount <= 0) {
+            showCelebration("¡Te has quedado sin vidas por hoy! Vuelve mañana para más vidas. ⏳")
+            return
+        }
         val current = _animalQuizState.value
         val isCorrect = current.selectedChoice == current.animalName
         if (isCorrect) {
@@ -283,6 +299,10 @@ class EduPlayViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun continueNumberQuiz() {
+        if (_stats.value.livesCount <= 0) {
+            showCelebration("¡Te has quedado sin vidas por hoy! Vuelve mañana para más vidas. ⏳")
+            return
+        }
         val current = _numberQuizState.value
         if (current.selectedChoice == current.count) {
             addXpAndPersist(50, 5, 0, 1, 1)
@@ -299,6 +319,10 @@ class EduPlayViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun checkMatchAnswers() {
+        if (_stats.value.livesCount <= 0) {
+            showCelebration("¡Te has quedado sin vidas por hoy! Vuelve mañana para más vidas. ⏳")
+            return
+        }
         addXpAndPersist(80, 8, 0, 1, 1)
         showCelebration("¡Fantástico! ¡Todos los animales emparejados correctamente! 🐾")
     }
@@ -308,15 +332,6 @@ class EduPlayViewModel(application: Application) : AndroidViewModel(application)
         if (current != null) {
             viewModelScope.launch {
                 userRepository.updateStats(current.username, xp, gems, streak, lessons, games)
-            }
-        } else {
-            _stats.update {
-                it.copy(
-                    totalXp = it.totalXp + xp,
-                    gemsCount = it.gemsCount + gems,
-                    lessonsCompleted = it.lessonsCompleted + lessons,
-                    gamesPlayed = it.gamesPlayed + games
-                )
             }
         }
     }

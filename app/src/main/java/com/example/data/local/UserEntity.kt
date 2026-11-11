@@ -16,5 +16,7 @@ data class UserEntity(
     val gemsCount: Int = 25,
     val lessonsCompleted: Int = 32,
     val gamesPlayed: Int = 24,
+    val livesCount: Int = 10,
+    val lastResetTimestamp: Long = System.currentTimeMillis(),
     val isCurrent: Boolean = false
 )

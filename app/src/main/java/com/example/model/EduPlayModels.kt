@@ -11,7 +11,8 @@ data class UserStats(
     val gamesPlayed: Int = 24,
     val longestStreak: Int = 32,
     val dailyGoalCompleted: Int = 2,
-    val dailyGoalTotal: Int = 3
+    val dailyGoalTotal: Int = 3,
+    val livesCount: Int = 10
 )
 
 data class UserProfile(
