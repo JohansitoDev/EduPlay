@@ -1,0 +1,6 @@
+{
+  "name": "EduPlay",
+  "description": "Interactive and fun educational learning app for kids featuring alphabet, numbers, quizzes, tracing, word building, and games.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
