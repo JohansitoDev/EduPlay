@@ -5,9 +5,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.R
-import com.example.data.local.EduPlayDatabase
+import com.example.data.network.EduPlayApiClient
 import com.example.data.local.UserEntity
-import com.example.data.local.UserRepository
 import com.example.model.AppDestination
 import com.example.model.AppTab
 import com.example.model.BadgeData
@@ -55,42 +54,7 @@ data class MatchItState(
 )
 
 class EduPlayViewModel(application: Application) : AndroidViewModel(application) {
-    private val userRepository: UserRepository
-
-    init {
-        val userDao = EduPlayDatabase.getDatabase(application).userDao()
-        userRepository = UserRepository(userDao)
-        viewModelScope.launch {
-            userRepository.currentUser.collect { entity ->
-                if (entity != null) {
-                    _userEntity.value = entity
-                    _stats.value = UserStats(
-                        dayStreak = entity.dayStreak,
-                        totalXp = entity.totalXp,
-                        badgesCount = entity.badgesCount,
-                        gemsCount = entity.gemsCount,
-                        lessonsCompleted = entity.lessonsCompleted,
-                        gamesPlayed = entity.gamesPlayed,
-                        longestStreak = entity.dayStreak + 5,
-                        dailyGoalCompleted = 2,
-                        dailyGoalTotal = 3,
-                        livesCount = entity.livesCount
-                    )
-                    _userProfile.value = UserProfile(
-                        name = entity.name,
-                        fullName = entity.fullName,
-                        handle = entity.handle,
-                        joinedYear = "2024",
-                        avatarRes = R.drawable.img_avatar_emma
-                    )
-                    // Mostrar notificación persistente de vidas restantes
-                    NotificationHelper.showPersistentLivesNotification(application, entity.livesCount)
-                } else {
-                    _userEntity.value = null
-                }
-            }
-        }
-    }
+    private val apiClient = EduPlayApiClient(application)
 
     private val _userEntity = MutableStateFlow<UserEntity?>(null)
     val userEntity: StateFlow<UserEntity?> = _userEntity.asStateFlow()
@@ -157,18 +121,49 @@ class EduPlayViewModel(application: Application) : AndroidViewModel(application)
 
     fun login(username: String, password: String) {
         viewModelScope.launch {
-            userRepository.loginOrRegister(username, password)
+            val res = apiClient.login(username, password)
+            if (res != null) {
+                val entity = UserEntity(
+                    username = res.username,
+                    password = password,
+                    name = res.name,
+                    fullName = res.fullName,
+                    handle = res.handle,
+                    dayStreak = res.dayStreak,
+                    totalXp = res.totalXp,
+                    gemsCount = res.gemsCount,
+                    lessonsCompleted = res.lessonsCompleted,
+                    gamesPlayed = res.gamesPlayed,
+                    livesCount = res.livesCount,
+                    isCurrent = true
+                )
+                _userEntity.value = entity
+                _stats.value = UserStats(
+                    dayStreak = res.dayStreak,
+                    totalXp = res.totalXp,
+                    badgesCount = 18,
+                    gemsCount = res.gemsCount,
+                    lessonsCompleted = res.lessonsCompleted,
+                    gamesPlayed = res.gamesPlayed,
+                    longestStreak = res.dayStreak + 5,
+                    dailyGoalCompleted = 2,
+                    dailyGoalTotal = 3,
+                    livesCount = res.livesCount
+                )
+                _userProfile.value = UserProfile(
+                    name = res.name,
+                    fullName = res.fullName,
+                    handle = res.handle,
+                    joinedYear = "2024",
+                    avatarRes = R.drawable.img_avatar_emma
+                )
+                NotificationHelper.showPersistentLivesNotification(getApplication(), res.livesCount)
+            }
         }
     }
 
     fun logout() {
-        viewModelScope.launch {
-            val current = _userEntity.value
-            if (current != null) {
-                userRepository.logout(current.username)
-            }
-            _userEntity.value = null
-        }
+        _userEntity.value = null
     }
 
     fun selectTab(tab: AppTab) {
@@ -209,7 +204,7 @@ class EduPlayViewModel(application: Application) : AndroidViewModel(application)
             showCelebration("¡Te has quedado sin vidas por hoy! Vuelve mañana para más vidas. ⏳")
             return
         }
-        addXpAndPersist(50, 5, 0, 1, 0)
+        performAction(50, 5, 1, 0)
         showCelebration("¡Excelente trabajo trazando! ¡Letra dominada! ⭐")
     }
 
@@ -255,7 +250,7 @@ class EduPlayViewModel(application: Application) : AndroidViewModel(application)
         val isMatch = assembled.equals(current.targetWord, ignoreCase = true)
         _wordBuilderState.value = current.copy(isCorrect = isMatch)
         if (isMatch) {
-            addXpAndPersist(100, 10, 0, 1, 1)
+            performAction(100, 10, 1, 1)
             showCelebration("¡Asombroso! ¡Formaste '${current.targetWord}'! 🎉")
         }
         return isMatch
@@ -288,7 +283,7 @@ class EduPlayViewModel(application: Application) : AndroidViewModel(application)
         val current = _animalQuizState.value
         val isCorrect = current.selectedChoice == current.animalName
         if (isCorrect) {
-            addXpAndPersist(50, 5, 0, 1, 1)
+            performAction(50, 5, 1, 1)
             showCelebration("¡Correcto! ¡Es una amigable ${current.animalName}! 🌟")
         }
     }
@@ -305,7 +300,7 @@ class EduPlayViewModel(application: Application) : AndroidViewModel(application)
         }
         val current = _numberQuizState.value
         if (current.selectedChoice == current.count) {
-            addXpAndPersist(50, 5, 0, 1, 1)
+            performAction(50, 5, 1, 1)
             showCelebration("¡Exacto! ¡Hay 7 jugosas manzanas! 🍎")
         }
     }
@@ -323,15 +318,23 @@ class EduPlayViewModel(application: Application) : AndroidViewModel(application)
             showCelebration("¡Te has quedado sin vidas por hoy! Vuelve mañana para más vidas. ⏳")
             return
         }
-        addXpAndPersist(80, 8, 0, 1, 1)
+        performAction(80, 8, 1, 1)
         showCelebration("¡Fantástico! ¡Todos los animales emparejados correctamente! 🐾")
     }
 
-    private fun addXpAndPersist(xp: Int, gems: Int, streak: Int, lessons: Int, games: Int) {
-        val current = _userEntity.value
-        if (current != null) {
-            viewModelScope.launch {
-                userRepository.updateStats(current.username, xp, gems, streak, lessons, games)
+    private fun performAction(xp: Int, gems: Int, lessons: Int, games: Int) {
+        val currentUser = _userEntity.value ?: return
+        viewModelScope.launch {
+            val res = apiClient.recordAction(currentUser.username, xp, gems, lessons, games)
+            if (res != null) {
+                _stats.value = _stats.value.copy(
+                    totalXp = res.totalXp,
+                    gemsCount = res.gemsCount,
+                    lessonsCompleted = res.lessonsCompleted,
+                    gamesPlayed = res.gamesPlayed,
+                    livesCount = res.livesCount
+                )
+                NotificationHelper.showPersistentLivesNotification(getApplication(), res.livesCount)
             }
         }
     }
@@ -342,5 +345,10 @@ class EduPlayViewModel(application: Application) : AndroidViewModel(application)
 
     fun dismissCelebration() {
         _celebrationText.value = null
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        apiClient.close()
     }
 }

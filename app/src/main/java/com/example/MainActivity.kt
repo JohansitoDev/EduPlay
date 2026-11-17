@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.data.server.EduPlayLocalServer
 import com.example.model.AppDestination
 import com.example.model.AppTab
 import com.example.ui.components.CelebrationDialog
@@ -40,11 +41,17 @@ import com.example.viewmodel.EduPlayViewModel
 
 class MainActivity : ComponentActivity() {
     private var soundManager: SoundManager? = null
+    private var localServer: EduPlayLocalServer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         soundManager = SoundManager(this)
+
+        // Start local Ktor backend server
+        localServer = EduPlayLocalServer(applicationContext).apply {
+            start()
+        }
 
         setContent {
             EduPlayTheme {
@@ -57,6 +64,8 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         soundManager?.shutdown()
         soundManager = null
+        localServer?.stop()
+        localServer = null
     }
 }
 
