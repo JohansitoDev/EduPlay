@@ -1,6 +1,5 @@
 package com.example.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,23 +13,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -45,22 +42,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.R
 import com.example.model.UserProfile
 import com.example.model.UserStats
-import com.example.ui.theme.PastelYellow
 import com.example.ui.theme.PrimaryBlue
 import com.example.ui.theme.PrimaryGreen
 import com.example.ui.theme.PrimaryOrange
 import com.example.ui.theme.TextDark
 import com.example.ui.theme.TextMuted
-import com.example.util.SoundManager
 
 @Composable
 fun ProfileTabScreen(
@@ -68,47 +59,54 @@ fun ProfileTabScreen(
     stats: UserStats,
     soundEnabled: Boolean,
     notificationsEnabled: Boolean,
-    soundManager: SoundManager?,
     onToggleSound: (Boolean) -> Unit,
     onToggleNotifications: (Boolean) -> Unit,
     onToggleProfile: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var showParentZoneDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
+    var showAvatarDialog by remember { mutableStateOf(false) }
+    var selectedAvatarEmoji by remember { mutableStateOf("🦁") }
 
-    if (showParentZoneDialog) {
+    val avatarList = listOf("🦁", "🐯", "🐼", "🦊", "🐰", "👧", "👦", "🐸", "🦄", "🦖")
+
+    if (showAvatarDialog) {
         AlertDialog(
-            onDismissRequest = { showParentZoneDialog = false },
+            onDismissRequest = { showAvatarDialog = false },
             title = {
                 Text(
-                    text = "Parent Zone 🛡️",
+                    text = "Elige tu Avatar 🎨",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
             },
             text = {
-                Column {
-                    Text(
-                        text = "To access Parent Controls, solve this quick math puzzle:\n\nWhat is 4 + 5?",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = "Daily Screen Time Limit: 45 mins\nAudio Speech Rate: Clear (0.9x)\nContent Difficulty: Ages 4-7",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = TextMuted
-                    )
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(4),
+                    modifier = Modifier.height(200.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(avatarList) { emoji ->
+                        Box(
+                            modifier = Modifier
+                                .size(60.dp)
+                                .clip(CircleShape)
+                                .background(if (selectedAvatarEmoji == emoji) Color(0xFFE5FDCC) else Color(0xFFF0F0F0))
+                                .clickable {
+                                    selectedAvatarEmoji = emoji
+                                    showAvatarDialog = false
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = emoji, fontSize = 32.sp)
+                        }
+                    }
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showParentZoneDialog = false }) {
-                    Text("Unlock & Save", fontWeight = FontWeight.Bold, color = PrimaryBlue)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showParentZoneDialog = false }) {
-                    Text("Close", color = TextMuted)
+                TextButton(onClick = { showAvatarDialog = false }) {
+                    Text("Cerrar", color = PrimaryBlue)
                 }
             }
         )
@@ -119,20 +117,20 @@ fun ProfileTabScreen(
             onDismissRequest = { showAboutDialog = false },
             title = {
                 Text(
-                    text = "About EduPlay 🎈",
+                    text = "Acerca de EduPlay",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
             },
             text = {
                 Text(
-                    text = "EduPlay is designed to spark joy, curiosity, and literacy for early learners through interactive games, letter tracing, and playful phonics.",
+                    text = "EduPlay está diseñado para despertar alegría, curiosidad y alfabetización en los primeros estudiantes a través de juegos interactivos, trazo de letras y fonética lúdica.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
             confirmButton = {
                 TextButton(onClick = { showAboutDialog = false }) {
-                    Text("Close", color = PrimaryBlue)
+                    Text("Cerrar", color = PrimaryBlue)
                 }
             }
         )
@@ -141,18 +139,18 @@ fun ProfileTabScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFFBF8F4))
+            .background(Color(0xFFF7F7F7))
     ) {
         // Top Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Profile",
+                text = "Mi Perfil",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.ExtraBold,
                 color = TextDark
@@ -164,11 +162,10 @@ fun ProfileTabScreen(
                     .size(40.dp)
                     .background(Color.White, CircleShape)
                     .border(1.dp, Color(0xFFE2E8F0), CircleShape)
-                    .testTag("settings_gear_button")
             ) {
                 Icon(
                     imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings",
+                    contentDescription = "Ajustes",
                     tint = TextDark,
                     modifier = Modifier.size(20.dp)
                 )
@@ -181,7 +178,7 @@ fun ProfileTabScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Profile Card Header with Avatar & Edit pencil
+            // Profile Card Header with Avatar & Edit
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -196,40 +193,31 @@ fun ProfileTabScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         // Avatar with edit pencil
-                        Box(contentAlignment = Alignment.BottomEnd) {
+                        Box(
+                            contentAlignment = Alignment.BottomEnd,
+                            modifier = Modifier.clickable { showAvatarDialog = true }
+                        ) {
                             Box(
                                 modifier = Modifier
-                                    .size(86.dp)
+                                    .size(90.dp)
                                     .clip(CircleShape)
-                                    .border(3.dp, Color(0xFFFFD166), CircleShape)
-                                    .clickable { onToggleProfile() }
-                                    .testTag("profile_avatar"),
+                                    .background(Color(0xFFE5FDCC)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.img_avatar_emma),
-                                    contentDescription = profile.fullName,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
+                                Text(text = selectedAvatarEmoji, fontSize = 48.sp)
                             }
-
-                            // Edit pencil badge
                             Box(
                                 modifier = Modifier
-                                    .size(28.dp)
+                                    .size(32.dp)
                                     .clip(CircleShape)
-                                    .background(PrimaryBlue)
-                                    .border(2.dp, Color.White, CircleShape)
-                                    .clickable { onToggleProfile() }
-                                    .testTag("edit_avatar_button"),
+                                    .background(PrimaryGreen),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Edit,
-                                    contentDescription = "Edit Profile",
+                                    contentDescription = "Cambiar Avatar",
                                     tint = Color.White,
-                                    modifier = Modifier.size(14.dp)
+                                    modifier = Modifier.size(16.dp)
                                 )
                             }
                         }
@@ -237,213 +225,156 @@ fun ProfileTabScreen(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            text = profile.fullName,
+                            text = profile.name,
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.ExtraBold,
+                            fontWeight = FontWeight.Bold,
                             color = TextDark
                         )
-
-                        Spacer(modifier = Modifier.height(2.dp))
-
                         Text(
-                            text = "${profile.handle} • Joined since ${profile.joinedYear}",
-                            style = MaterialTheme.typography.bodySmall,
+                            text = profile.handle,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = TextMuted
                         )
                     }
                 }
             }
 
-            // 3 Stat Cards (Streak, Total XP, Badges)
+            // Graphical Statistics Section
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    ProfileStatCard(
-                        emoji = "🔥",
-                        value = "${stats.dayStreak}",
-                        label = "Day Streak",
-                        accentColor = PrimaryOrange,
-                        modifier = Modifier.weight(1f)
-                    )
-                    ProfileStatCard(
-                        emoji = "⭐",
-                        value = "${stats.totalXp}",
-                        label = "Total XP",
-                        accentColor = Color(0xFFEAB308),
-                        modifier = Modifier.weight(1f)
-                    )
-                    ProfileStatCard(
-                        emoji = "🏆",
-                        value = "${stats.badgesCount}",
-                        label = "Badges",
-                        accentColor = Color(0xFF8B5CF6),
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+                Text(
+                    text = "Estadísticas Gráficas 📊",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = TextDark
+                )
             }
 
-            // Go Premium Card
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = PastelYellow),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFDE68A))
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = "👑", fontSize = 28.sp)
-                            Spacer(modifier = Modifier.width(14.dp))
-                            Column {
-                                Text(
-                                    text = "Go Premium",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = Color(0xFF92400E)
-                                )
-                                Text(
-                                    text = "Unlock all content & features",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color(0xFFB45309)
-                                )
-                            }
-                        }
-
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                            contentDescription = "Go Premium",
-                            tint = Color(0xFFB45309),
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
-            }
-
-            // Settings & Options List
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(22.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
-                    Column(modifier = Modifier.padding(vertical = 6.dp)) {
-                        ProfileOptionItem(
-                            title = "Edit Profile",
-                            iconEmoji = "✏️",
-                            onClick = onToggleProfile
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        // Vidas restantes
+                        StatProgressBarRow(
+                            emoji = "❤️",
+                            label = "Vidas Diarias",
+                            value = "${stats.livesCount} / 10",
+                            progress = stats.livesCount / 10f,
+                            color = Color(0xFFFF4B4B)
                         )
-                        ProfileOptionItem(
-                            title = "Learning Goals",
-                            iconEmoji = "🎯",
-                            onClick = {}
+                        // Racha
+                        StatProgressBarRow(
+                            emoji = "🔥",
+                            label = "Racha de Días",
+                            value = "${stats.dayStreak} días",
+                            progress = (stats.dayStreak % 30) / 30f,
+                            color = PrimaryOrange
                         )
-                        ProfileOptionItem(
-                            title = "Parent Zone",
-                            iconEmoji = "🛡️",
-                            onClick = { showParentZoneDialog = true }
+                        // XP
+                        StatProgressBarRow(
+                            emoji = "⭐",
+                            label = "Puntuación XP",
+                            value = "${stats.totalXp} XP",
+                            progress = (stats.totalXp % 5000) / 5000f,
+                            color = Color(0xFFFFB703)
                         )
-
-                        // Sound Toggle
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = "🔊", fontSize = 18.sp)
-                                Spacer(modifier = Modifier.width(14.dp))
-                                Text(
-                                    text = "Sound",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextDark
-                                )
-                            }
-                            Switch(
-                                checked = soundEnabled,
-                                onCheckedChange = {
-                                    onToggleSound(it)
-                                    soundManager?.isSoundEnabled = it
-                                },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = Color.White,
-                                    checkedTrackColor = PrimaryGreen
-                                ),
-                                modifier = Modifier.testTag("sound_toggle")
-                            )
-                        }
-
-                        // Notifications Toggle
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = "🔔", fontSize = 18.sp)
-                                Spacer(modifier = Modifier.width(14.dp))
-                                Text(
-                                    text = "Notifications",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextDark
-                                )
-                            }
-                            Switch(
-                                checked = notificationsEnabled,
-                                onCheckedChange = onToggleNotifications,
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = Color.White,
-                                    checkedTrackColor = PrimaryGreen
-                                ),
-                                modifier = Modifier.testTag("notifications_toggle")
-                            )
-                        }
-
-                        ProfileOptionItem(
-                            title = "Help & Support",
-                            iconEmoji = "❓",
-                            onClick = {}
+                        // Gemas
+                        StatProgressBarRow(
+                            emoji = "💎",
+                            label = "Gemas Coleccionadas",
+                            value = "${stats.gemsCount}",
+                            progress = (stats.gemsCount % 100) / 100f,
+                            color = PrimaryBlue
                         )
-                        ProfileOptionItem(
-                            title = "About Us",
-                            iconEmoji = "ℹ️",
-                            onClick = { showAboutDialog = true }
+                        // Lecciones
+                        StatProgressBarRow(
+                            emoji = "📚",
+                            label = "Lecciones Completadas",
+                            value = "${stats.lessonsCompleted}",
+                            progress = (stats.lessonsCompleted % 50) / 50f,
+                            color = PrimaryGreen
                         )
                     }
                 }
             }
 
-            // Log Out Button
+            // Settings Section
+            item {
+                Text(
+                    text = "Ajustes",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = TextDark
+                )
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "Sonido y Voz", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                            Switch(
+                                checked = soundEnabled,
+                                onCheckedChange = onToggleSound,
+                                colors = SwitchDefaults.colors(checkedThumbColor = PrimaryGreen)
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "Notificaciones", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                            Switch(
+                                checked = notificationsEnabled,
+                                onCheckedChange = onToggleNotifications,
+                                colors = SwitchDefaults.colors(checkedThumbColor = PrimaryGreen)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Logout Button
             item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 30.dp),
+                        .padding(bottom = 24.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFFFFEEEE))
+                        .clickable { onToggleProfile() }
+                        .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Log Out",
-                        style = MaterialTheme.typography.titleMedium,
+                        text = "Cerrar Sesión / Cambiar Usuario",
+                        color = Color(0xFFFF4B4B),
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFFEF4444),
-                        modifier = Modifier
-                            .clickable { onToggleProfile() }
-                            .padding(8.dp)
-                            .testTag("logout_button")
+                        fontSize = 16.sp
                     )
                 }
             }
@@ -452,75 +383,34 @@ fun ProfileTabScreen(
 }
 
 @Composable
-fun ProfileStatCard(
+fun StatProgressBarRow(
     emoji: String,
-    value: String,
     label: String,
-    accentColor: Color,
-    modifier: Modifier = Modifier
+    value: String,
+    progress: Float,
+    color: Color
 ) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(text = emoji, fontSize = 20.sp)
+                Text(text = label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = TextDark)
+            }
+            Text(text = value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = TextDark)
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        LinearProgressIndicator(
+            progress = { progress.coerceIn(0f, 1f) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 14.dp, horizontal = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = emoji, fontSize = 24.sp)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.ExtraBold,
-                color = TextDark
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = TextMuted,
-                fontSize = 11.sp
-            )
-        }
-    }
-}
-
-@Composable
-fun ProfileOptionItem(
-    title: String,
-    iconEmoji: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = iconEmoji, fontSize = 18.sp)
-            Spacer(modifier = Modifier.width(14.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
-                color = TextDark
-            )
-        }
-
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-            contentDescription = title,
-            tint = Color(0xFFCBD5E1),
-            modifier = Modifier.size(14.dp)
+                .height(8.dp)
+                .clip(RoundedCornerShape(4.dp)),
+            color = color,
+            trackColor = Color(0xFFF0F0F0)
         )
     }
 }

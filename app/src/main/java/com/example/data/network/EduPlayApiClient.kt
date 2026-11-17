@@ -9,7 +9,8 @@ class EduPlayApiClient(context: Context) {
     private val userDao = EduPlayDatabase.getDatabase(context).userDao()
 
     suspend fun login(username: String, password: String): UserResponse? {
-        val trimmed = username.trim().lowercase()
+        val rawName = if (username.isBlank()) "Invitado" else username
+        val trimmed = rawName.trim().lowercase()
         val now = System.currentTimeMillis()
         val twentyFourHours = 24 * 60 * 60 * 1000L
 
@@ -35,8 +36,8 @@ class EduPlayApiClient(context: Context) {
             val newUser = UserEntity(
                 username = trimmed,
                 password = password,
-                name = trimmed.replaceFirstChar { it.uppercase() },
-                fullName = trimmed.replaceFirstChar { it.uppercase() + " Estudiante" },
+                name = rawName.replaceFirstChar { it.uppercase() },
+                fullName = rawName.replaceFirstChar { it.uppercase() + " Estudiante" },
                 handle = "@$trimmed",
                 dayStreak = 1,
                 totalXp = 50,

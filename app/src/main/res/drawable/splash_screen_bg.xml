@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Solid orange full screen background -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#FF8A00" />
+        </shape>
+    </item>
+    <!-- Larger centered icon without borders or shadows -->
+    <item
+        android:width="220dp"
+        android:height="220dp"
+        android:gravity="center"
+        android:drawable="@drawable/app_launcher_icon_1794400147604" />
+</layer-list>

@@ -151,7 +151,6 @@ fun EduPlayApp(
                                 stats = stats,
                                 soundEnabled = soundEnabled,
                                 notificationsEnabled = notificationsEnabled,
-                                soundManager = soundManager,
                                 onToggleSound = { viewModel.toggleSound(it) },
                                 onToggleNotifications = { viewModel.toggleNotifications(it) },
                                 onToggleProfile = { viewModel.logout() }

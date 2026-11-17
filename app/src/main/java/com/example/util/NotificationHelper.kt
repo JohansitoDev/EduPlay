@@ -40,7 +40,7 @@ object NotificationHelper {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_dialog_info)
-            .setContentTitle("EduPlay - Vidas Diarias 🎈")
+            .setContentTitle("EduPlay - Vidas Diarias")
             .setContentText("Te quedan $lives de 10 vidas hoy (Reinicio en 24h)")
             .setOngoing(true) // Notificación persistente
             .setContentIntent(pendingIntent)

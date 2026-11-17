@@ -49,6 +49,7 @@ import com.example.model.AppDestination
 import com.example.model.AppTab
 import com.example.model.UserProfile
 import com.example.model.UserStats
+import com.example.ui.components.DuolingoCard
 import com.example.ui.components.MainTopBar
 import com.example.ui.theme.PastelBlue
 import com.example.ui.theme.PastelGreen
@@ -73,7 +74,7 @@ fun HomeScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFFBF8F4))
+            .background(Color(0xFFF7F7F7))
     ) {
         MainTopBar(
             streakCount = stats.dayStreak,
@@ -94,7 +95,7 @@ fun HomeScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Quick Actions 🚀",
+                        text = "Acciones Rápidas 🚀",
                         style = MaterialTheme.typography.titleMedium,
                         color = TextDark
                     )
@@ -109,7 +110,7 @@ fun HomeScreen(
                             .padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "🔄 Switch Learner: Current is ${profile.name}", style = MaterialTheme.typography.bodyLarge)
+                        Text(text = "🔄 Cambiar Usuario: ${profile.name}", style = MaterialTheme.typography.bodyLarge)
                     }
                     Row(
                         modifier = Modifier
@@ -121,7 +122,7 @@ fun HomeScreen(
                             .padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "🔥 View Daily Streak Calendar", style = MaterialTheme.typography.bodyLarge)
+                        Text(text = "🔥 Ver Calendario de Racha", style = MaterialTheme.typography.bodyLarge)
                     }
                 }
             }
@@ -133,25 +134,25 @@ fun HomeScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Greeting & Avatar Header
+            // Greeting & Avatar Header with hand wave
             item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 4.dp),
+                        .padding(top = 12.dp, bottom = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
                         Text(
-                            text = "Hi, ${profile.name}! 👋",
+                            text = "¡Hola, ${profile.name}! 👋",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.ExtraBold,
                             color = TextDark
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Let's learn something new today!",
+                            text = "¡Aprendamos algo nuevo hoy!",
                             style = MaterialTheme.typography.bodyMedium,
                             color = TextMuted
                         )
@@ -169,7 +170,7 @@ fun HomeScreen(
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.img_avatar_emma),
-                            contentDescription = "Learner Avatar",
+                            contentDescription = "Avatar",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
@@ -177,22 +178,17 @@ fun HomeScreen(
                 }
             }
 
-            // Streak Card
+            // Streak 3D Card
             item {
-                Card(
+                DuolingoCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onNavigate(AppDestination.StreakDetail) }
                         .testTag("home_streak_card"),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    containerColor = Color.White,
+                    shadowColor = Color(0xFFE2E8F0),
+                    onClick = { onNavigate(AppDestination.StreakDetail) }
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(18.dp)
-                    ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -209,7 +205,7 @@ fun HomeScreen(
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = "day streak",
+                                    text = "días de racha",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = TextMuted,
                                     fontWeight = FontWeight.Medium
@@ -220,7 +216,7 @@ fun HomeScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         // Days of week row
-                        val days = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
+                        val days = listOf("Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa")
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -259,7 +255,7 @@ fun HomeScreen(
                                         } else if (isPastDay) {
                                             Icon(
                                                 imageVector = Icons.Default.Check,
-                                                contentDescription = "Done",
+                                                contentDescription = "Listo",
                                                 tint = Color.White,
                                                 modifier = Modifier.size(16.dp)
                                             )
@@ -277,14 +273,14 @@ fun HomeScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = "You're on fire! 🔥 Keep going!",
+                                text = "¡Vas por buen camino! 🔥 ¡Sigue así!",
                                 style = MaterialTheme.typography.labelLarge,
                                 color = Color(0xFFD97706),
                                 fontWeight = FontWeight.Bold
                             )
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                                contentDescription = "Streak Details",
+                                contentDescription = "Detalles",
                                 tint = Color(0xFFD97706),
                                 modifier = Modifier.size(14.dp)
                             )
@@ -296,7 +292,7 @@ fun HomeScreen(
             // Learn Categories Section
             item {
                 Text(
-                    text = "Learn Categories",
+                    text = "Categorías de Aprendizaje",
                     style = MaterialTheme.typography.titleLarge,
                     color = TextDark,
                     fontWeight = FontWeight.Bold,
@@ -304,16 +300,16 @@ fun HomeScreen(
                 )
             }
 
-            // 2x2 Grid of Category Cards
+            // 2x2 Grid of 3D Duolingo Category Cards
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     // Row 1: Alphabet & Numbers
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         CategoryGridCard(
-                            title = "Alphabet",
+                            title = "Alfabeto",
                             iconEmoji = "🔤",
                             badgeText = "A B C",
                             bgColor = PastelGreen,
@@ -324,7 +320,7 @@ fun HomeScreen(
                         )
 
                         CategoryGridCard(
-                            title = "Numbers",
+                            title = "Números",
                             iconEmoji = "🔢",
                             badgeText = "1 2 3",
                             bgColor = PastelBlue,
@@ -338,10 +334,10 @@ fun HomeScreen(
                     // Row 2: Animals & Colors
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         CategoryGridCard(
-                            title = "Animals",
+                            title = "Animales",
                             iconEmoji = "🦁",
                             badgeText = null,
                             bgColor = PastelOrange,
@@ -352,7 +348,7 @@ fun HomeScreen(
                         )
 
                         CategoryGridCard(
-                            title = "Colors",
+                            title = "Colores",
                             iconEmoji = "🎨",
                             badgeText = null,
                             bgColor = PastelPurple,
@@ -365,32 +361,29 @@ fun HomeScreen(
                 }
             }
 
-            // Today's Goal Card
+            // Today's Goal 3D Card
             item {
-                Card(
+                DuolingoCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 24.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    containerColor = Color.White,
+                    shadowColor = Color(0xFFE2E8F0)
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(18.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Today's Goal",
+                                text = "Meta de Hoy",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = TextDark,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Complete ${stats.dailyGoalTotal} activities",
+                                text = "Completa ${stats.dailyGoalTotal} actividades",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = TextMuted
                             )
@@ -435,19 +428,16 @@ fun CategoryGridCard(
     modifier: Modifier = Modifier,
     testTag: String = ""
 ) {
-    Card(
+    DuolingoCard(
         modifier = modifier
             .height(130.dp)
-            .clip(RoundedCornerShape(22.dp))
-            .clickable { onClick() }
             .testTag(testTag),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = bgColor)
+        containerColor = bgColor,
+        shadowColor = accentColor.copy(alpha = 0.35f),
+        onClick = onClick
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
@@ -455,12 +445,11 @@ fun CategoryGridCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                // Icon or Badge
                 Box(
                     modifier = Modifier
                         .size(44.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.85f)),
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Color.White),
                     contentAlignment = Alignment.Center
                 ) {
                     if (badgeText != null) {
@@ -475,17 +464,16 @@ fun CategoryGridCard(
                     }
                 }
 
-                // Arrow circle
                 Box(
                     modifier = Modifier
                         .size(28.dp)
                         .clip(CircleShape)
-                        .background(accentColor.copy(alpha = 0.2f)),
+                        .background(accentColor.copy(alpha = 0.25f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "Go",
+                        contentDescription = "Ir",
                         tint = accentColor,
                         modifier = Modifier.size(14.dp)
                     )
